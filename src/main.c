@@ -23,6 +23,19 @@ static float cube_vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.5f, 0.5f, 0.5f,
 };
 
+static float cube2_vertices[] = {
+    // Front face
+    -0.5f, -0.5f,  6.5f,  0.0f, 1.0f, 1.0f,
+     0.5f, -0.5f,  6.5f,  1.0f, 0.0f, 1.0f,
+     0.5f,  0.5f,  6.5f,  1.0f, 1.0f, 0.0f,
+    -0.5f,  0.5f,  6.5f,  1.0f, 1.0f, 1.0f,
+    // Back face
+    -0.5f, -0.5f,  5.5f,  0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  5.5f,  0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f,  5.5f,  0.0f, 0.0f, 1.0f,
+    -0.5f,  0.5f,  5.5f,  1.0f, 0.0f, 1.0f,
+};
+
 static unsigned int cube_indices[] = {
     0, 1, 2,  2, 3, 0,   // front
     4, 5, 6,  6, 7, 4,   // back
@@ -56,6 +69,15 @@ int main(void){
     buffer b;
     init_buffer(&b,&cube_mesh);
 
+    Mesh cube2_mesh;
+    init_mesh(&cube2_mesh,
+        cube2_vertices,sizeof(cube2_vertices)/sizeof(cube2_vertices[0]),
+        cube_indices,sizeof(cube_indices)/sizeof(cube_indices[0])
+    );
+
+    buffer b2;
+    init_buffer(&b2,&cube2_mesh);
+
     Camera cam;
     camera_init(&cam,.0f,.0f,3.f,   // position
                 .0f,.0f);
@@ -63,6 +85,7 @@ int main(void){
 
     GLint mvpLoc=glGetUniformLocation(program,"uMVP");
 
+    bool not_draw=false;
     while(!glfwWindowShouldClose(window)){
         // frame setup
         glClearColor(.1f,.1f,.15f,1.f);
@@ -89,6 +112,9 @@ int main(void){
 
         // DRAW
         draw_shape(&b);
+        if(glfwGetKey(window,GLFW_KEY_G)==GLFW_PRESS)not_draw=!not_draw;
+        if(!not_draw)draw_shape(&b2);
+
         overlay_draw(window,&cam);
         // {
         //     int w, h;
