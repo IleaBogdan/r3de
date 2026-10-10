@@ -78,42 +78,56 @@ int main(void){
     buffer b2;
     init_buffer(&b2,&cube2_mesh);
 
+    stack_buf*draw_stack_var=NULL;
+    push(&draw_stack_var,b);
+    push(&draw_stack_var,b2);
+    // printf("%d",stack_size(draw_stack_var));
+    
     Camera cam;
     camera_init(&cam,.0f,.0f,3.f,   // position
-                .0f,.0f);
-
-
+        .0f,.0f);
+        
     GLint mvpLoc=glGetUniformLocation(program,"uMVP");
-
-    bool not_draw=false;
+    
+    bool b2_deleted=false;
+    bool g_prev=false;
     while(!glfwWindowShouldClose(window)){
         // frame setup
         glClearColor(.1f,.1f,.15f,1.f);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
+        
         // resize window viewpoint
         int w,h;
         glfwGetFramebufferSize(window,&w,&h);
         glViewport(0,0,w,h);
-
+        
         float t=(float)glfwGetTime();
         bool spin=false;
-
+        
         // BUILD THE MVP MATRIX
         Mat4 proj=mat4_perspective(1.f,(float)w/(float)h,.1f,100.f);
         Mat4 view=camera_view(&cam);
         Mat4 model=spin?mat4_mul(mat4_rotate_y(t),mat4_rotate_x(t*.5f)):mat4_identity();
         Mat4 mvp=mat4_mul(proj,mat4_mul(view,model));
-
+        
         // UPLOAD TO GPU
         glUseProgram(program);
         glUniformMatrix4fv(mvpLoc,1,GL_FALSE,mvp.m);
-
-
+        
+        
         // DRAW
-        draw_shape(&b);
-        if(glfwGetKey(window,GLFW_KEY_G)==GLFW_PRESS)not_draw=!not_draw;
-        if(!not_draw)draw_shape(&b2);
+        bool g_pressed=glfwGetKey(window,GLFW_KEY_G)==GLFW_PRESS;
+        if(g_pressed&&!g_prev){
+            if(b2_deleted){
+                push(&draw_stack_var,b2);
+                b2_deleted=false;
+            }else{
+                delete_by_index(&draw_stack_var,0);
+                b2_deleted=true;
+            }
+        }
+        g_prev=g_pressed;
+        draw_stack(draw_stack_var,draw_shape);
 
         overlay_draw(window,&cam);
         // {
@@ -129,10 +143,11 @@ int main(void){
         glfwSwapBuffers(window);
         glfwPollEvents();
         camera_keyboard_input(window,&cam);
-
+        
         // camera_move(&cam,.01,.0f);
         // camera_rotate(&cam,.01f,.0f);
     }
+    clear_stack(draw_stack_var);
     glfwTerminate();
     return 0;
 }
