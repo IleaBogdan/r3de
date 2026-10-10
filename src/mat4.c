@@ -1,4 +1,4 @@
-#include"mat4.h"
+#include"mat/mat4.h"
 
 // returns the I4 matrix
 Mat4 mat4_identity(void){

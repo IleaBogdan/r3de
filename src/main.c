@@ -3,7 +3,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#include<mat4.h>
+#include<mat/matall.h>
 #include<glhelper.h>
 #include<shapes.h>
 #include<buffers.h>
@@ -31,6 +31,14 @@ static unsigned int cube_indices[] = {
     1, 2, 6,  6, 5, 1,   // right
 };
 
+void keyboard_(GLFWwindow*window,Camera*cam){
+    float rotSpeed=.02f;
+    if(glfwGetKey(window,GLFW_KEY_LEFT)==GLFW_PRESS)camera_rotate(cam,-rotSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_RIGHT)==GLFW_PRESS)camera_rotate(cam,rotSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_UP)==GLFW_PRESS)camera_rotate(cam,0.f,-rotSpeed);
+    if(glfwGetKey(window,GLFW_KEY_DOWN)==GLFW_PRESS)camera_rotate(cam,0.f,rotSpeed);
+}
+
 int main(void){
     GLFWwindow*window;
     if(init_gl_stuff(&window)){
@@ -54,7 +62,7 @@ int main(void){
 
     Camera cam;
     camera_init(&cam,.0f,.0f,3.f,   // position
-                .0f,.0f,.0f);  // looking at origin
+                .0f,.0f);
 
 
     GLint mvpLoc=glGetUniformLocation(program,"uMVP");
@@ -88,8 +96,10 @@ int main(void){
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        keyboard_(window,&cam);
 
-        // camera_move(&cam, 0.001f, 0.0f, 0.0f);  // strafe right a bit each frame
+        camera_move(&cam,.0005f,.0f);
+        // camera_rotate(&cam,.01f,.0f);
     }
     glfwTerminate();
     return 0;
