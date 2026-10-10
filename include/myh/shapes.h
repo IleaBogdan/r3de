@@ -1,0 +1,21 @@
+#ifndef SHAPES_H
+#define SHAPES_H
+
+#include<stddef.h>
+
+typedef struct{
+    float*vertices;
+    size_t vertex_count;
+    unsigned int*indices;
+    size_t index_count;
+}Mesh;
+
+static inline Mesh*init_mesh(Mesh*m,float*verts,size_t vert_count,unsigned int*inds,size_t ind_count){
+    m->vertices=verts;
+    m->vertex_count=vert_count;
+    m->indices=inds;
+    m->index_count=ind_count;
+    return m;
+}
+
+#endif

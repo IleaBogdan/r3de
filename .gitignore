@@ -1,0 +1,5 @@
+.vscode
+bin
+include/glad
+include/KHR
+src/glad.c
