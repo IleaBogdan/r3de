@@ -1,0 +1,239 @@
+// this file is vibecoded beacuse I have no clue how to display text in opengl
+#include "overlay.h"
+#include <glad/glad.h>
+#include <stdio.h>
+#include <string.h>
+
+// ---- 5x7 bitmap font, ASCII 32-126 ----
+static const unsigned char font5x7[95][5] = {
+    {0x00,0x00,0x00,0x00,0x00},{0x00,0x00,0x5F,0x00,0x00},{0x00,0x07,0x00,0x07,0x00},
+    {0x14,0x7F,0x14,0x7F,0x14},{0x24,0x2A,0x7F,0x2A,0x12},{0x23,0x13,0x08,0x64,0x62},
+    {0x36,0x49,0x55,0x22,0x50},{0x00,0x05,0x03,0x00,0x00},{0x00,0x1C,0x22,0x41,0x00},
+    {0x00,0x41,0x22,0x1C,0x00},{0x14,0x08,0x3E,0x08,0x14},{0x08,0x08,0x3E,0x08,0x08},
+    {0x00,0x50,0x30,0x00,0x00},{0x08,0x08,0x08,0x08,0x08},{0x00,0x60,0x60,0x00,0x00},
+    {0x20,0x10,0x08,0x04,0x02},{0x3E,0x51,0x49,0x45,0x3E},{0x00,0x42,0x7F,0x40,0x00},
+    {0x42,0x61,0x51,0x49,0x46},{0x21,0x41,0x45,0x4B,0x31},{0x18,0x14,0x12,0x7F,0x10},
+    {0x27,0x45,0x45,0x45,0x39},{0x3C,0x4A,0x49,0x49,0x30},{0x01,0x71,0x09,0x05,0x03},
+    {0x36,0x49,0x49,0x49,0x36},{0x06,0x49,0x49,0x29,0x1E},{0x00,0x36,0x36,0x00,0x00},
+    {0x00,0x56,0x36,0x00,0x00},{0x08,0x14,0x22,0x41,0x00},{0x14,0x14,0x14,0x14,0x14},
+    {0x00,0x41,0x22,0x14,0x08},{0x02,0x01,0x51,0x09,0x06},{0x32,0x49,0x79,0x41,0x3E},
+    {0x7E,0x11,0x11,0x11,0x7E},{0x7F,0x49,0x49,0x49,0x36},{0x3E,0x41,0x41,0x41,0x22},
+    {0x7F,0x41,0x41,0x22,0x1C},{0x7F,0x49,0x49,0x49,0x41},{0x7F,0x09,0x09,0x09,0x01},
+    {0x3E,0x41,0x49,0x49,0x7A},{0x7F,0x08,0x08,0x08,0x7F},{0x00,0x41,0x7F,0x41,0x00},
+    {0x20,0x40,0x41,0x3F,0x01},{0x7F,0x08,0x14,0x22,0x41},{0x7F,0x40,0x40,0x40,0x40},
+    {0x7F,0x02,0x0C,0x02,0x7F},{0x7F,0x04,0x08,0x10,0x7F},{0x3E,0x41,0x41,0x41,0x3E},
+    {0x7F,0x09,0x09,0x09,0x06},{0x3E,0x41,0x51,0x21,0x5E},{0x7F,0x09,0x19,0x29,0x46},
+    {0x46,0x49,0x49,0x49,0x31},{0x01,0x01,0x7F,0x01,0x01},{0x3F,0x40,0x40,0x40,0x3F},
+    {0x1F,0x20,0x40,0x20,0x1F},{0x7F,0x20,0x18,0x20,0x7F},{0x63,0x14,0x08,0x14,0x63},
+    {0x03,0x04,0x78,0x04,0x03},{0x61,0x51,0x49,0x45,0x43},{0x00,0x7F,0x41,0x41,0x00},
+    {0x02,0x04,0x08,0x10,0x20},{0x00,0x41,0x41,0x7F,0x00},{0x04,0x02,0x01,0x02,0x04},
+    {0x40,0x40,0x40,0x40,0x40},{0x00,0x01,0x02,0x04,0x00},{0x20,0x54,0x54,0x54,0x78},
+    {0x7F,0x48,0x44,0x44,0x38},{0x38,0x44,0x44,0x44,0x20},{0x38,0x44,0x44,0x48,0x7F},
+    {0x38,0x54,0x54,0x54,0x18},{0x08,0x7E,0x09,0x01,0x02},{0x0C,0x52,0x52,0x52,0x3E},
+    {0x7F,0x08,0x04,0x04,0x78},{0x00,0x44,0x7D,0x40,0x00},{0x20,0x40,0x44,0x3D,0x00},
+    {0x7F,0x10,0x28,0x44,0x00},{0x00,0x41,0x7F,0x40,0x00},{0x7C,0x04,0x18,0x04,0x78},
+    {0x7C,0x08,0x04,0x04,0x78},{0x38,0x44,0x44,0x44,0x38},{0x7C,0x14,0x14,0x14,0x08},
+    {0x08,0x14,0x14,0x18,0x7C},{0x7C,0x08,0x04,0x04,0x08},{0x48,0x54,0x54,0x54,0x20},
+    {0x04,0x3F,0x44,0x40,0x20},{0x3C,0x40,0x40,0x20,0x7C},{0x1C,0x20,0x40,0x20,0x1C},
+    {0x3C,0x40,0x30,0x40,0x3C},{0x44,0x28,0x10,0x28,0x44},{0x0C,0x50,0x50,0x50,0x3C},
+    {0x44,0x64,0x54,0x4C,0x44},{0x00,0x08,0x36,0x41,0x00},{0x00,0x00,0x7F,0x00,0x00},
+    {0x00,0x41,0x36,0x08,0x00},{0x08,0x04,0x08,0x10,0x08},
+};
+
+#define GLYPH_W 5
+#define GLYPH_H 7
+
+// ---- GL resources ----
+static GLuint s_vao = 0, s_vbo = 0, s_prog = 0;
+static GLint  s_projLoc = -1, s_colorLoc = -1;
+
+static const char* VS_SRC =
+    "#version 330 core\n"
+    "layout(location=0) in vec2 aPos;\n"
+    "uniform mat4 uProj;\n"
+    "void main(){ gl_Position = uProj * vec4(aPos, 0.0, 1.0); }\n";
+
+static const char* FS_SRC =
+    "#version 330 core\n"
+    "uniform vec4 uColor;\n"
+    "out vec4 FragColor;\n"
+    "void main(){ FragColor = uColor; }\n";
+
+static GLuint compile(GLenum type, const char* src) {
+    GLuint s = glCreateShader(type);
+    glShaderSource(s, 1, &src, NULL);
+    glCompileShader(s);
+    GLint ok = 0;
+    glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
+    if (!ok) {
+        char log[512];
+        glGetShaderInfoLog(s, 512, NULL, log);
+        fprintf(stderr, "overlay shader error: %s\n", log);
+    }
+    return s;
+}
+
+void overlay_init(GLFWwindow* window) {
+    (void)window;
+    GLuint vs = compile(GL_VERTEX_SHADER, VS_SRC);
+    GLuint fs = compile(GL_FRAGMENT_SHADER, FS_SRC);
+    s_prog = glCreateProgram();
+    glAttachShader(s_prog, vs);
+    glAttachShader(s_prog, fs);
+    glLinkProgram(s_prog);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    s_projLoc  = glGetUniformLocation(s_prog, "uProj");
+    s_colorLoc = glGetUniformLocation(s_prog, "uColor");
+
+    glGenVertexArrays(1, &s_vao);
+    glGenBuffers(1, &s_vbo);
+    glBindVertexArray(s_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, s_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 8192 * 2 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), (void*)0);
+    glBindVertexArray(0);
+}
+
+// ---------- measurement helpers ----------
+float text_width(const char* text, float scale) {
+    float maxw = 0, linew = 0;
+    for (; *text; text++) {
+        if (*text == '\n') { if (linew > maxw) maxw = linew; linew = 0; }
+        else linew += (GLYPH_W + 1) * scale;
+    }
+    if (linew > maxw) maxw = linew;
+    // last char has no trailing advance
+    return maxw > 0 ? maxw - scale : 0;
+}
+
+float text_height(float scale) {
+    return GLYPH_H * scale;
+}
+
+// ---------- one-shot rendering context ----------
+// We do the save/restore + shader setup once per draw_text call.
+typedef struct {
+    int w, h;
+    GLint prev_prog, prev_vao;
+    GLboolean depth_on, cull_on, blend_on;
+    float* data;
+    int count, cap;
+} TextCtx;
+
+static void ctx_begin(TextCtx* c, GLFWwindow* window) {
+    glfwGetFramebufferSize(window, &c->w, &c->h);
+
+    c->depth_on = glIsEnabled(GL_DEPTH_TEST);
+    c->cull_on  = glIsEnabled(GL_CULL_FACE);
+    c->blend_on = glIsEnabled(GL_BLEND);
+    glGetIntegerv(GL_CURRENT_PROGRAM, &c->prev_prog);
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &c->prev_vao);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    static float scratch[8192 * 2];
+    c->data = scratch;
+    c->count = 0;
+    c->cap = 8192;
+}
+
+static void ctx_end(TextCtx* c) {
+    glBindVertexArray(c->prev_vao);
+    glUseProgram(c->prev_prog);
+    if (c->blend_on) glEnable(GL_BLEND); else glDisable(GL_BLEND);
+    if (c->depth_on) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+    if (c->cull_on)  glEnable(GL_CULL_FACE);  else glDisable(GL_CULL_FACE);
+}
+
+static void ctx_push_quad(TextCtx* c, float x, float y, float w, float h) {
+    if (c->count + 6 > c->cap) return;
+    float x2 = x + w, y2 = y + h;
+    float v[12] = { x,y,  x2,y,  x2,y2,   x,y,  x2,y2,  x,y2 };
+    memcpy(&c->data[c->count * 2], v, sizeof(v));
+    c->count += 6;
+}
+
+static void ctx_flush(TextCtx* c, float r, float g, float b, float a) {
+    if (c->count == 0) return;
+
+    // Ortho: pixel (0,0) top-left -> NDC (-1,1); pixel (w,h) -> (1,-1)
+    float proj[16] = {
+        2.0f / (float)c->w, 0,                  0, 0,
+        0,                 -2.0f / (float)c->h, 0, 0,
+        0,                  0,                 -1, 0,
+       -1,                  1,                  0, 1
+    };
+
+    glUseProgram(s_prog);
+    glUniformMatrix4fv(s_projLoc, 1, GL_FALSE, proj);
+    glUniform4f(s_colorLoc, r, g, b, a);
+    glBindVertexArray(s_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, s_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, c->count * 2 * sizeof(float), c->data);
+    glDrawArrays(GL_TRIANGLES, 0, c->count);
+    c->count = 0;
+}
+
+// ---------- public draw_text ----------
+void draw_text(GLFWwindow* window, const char* text, float x, float y,
+               float r, float g, float b, float a, float scale) {
+    TextCtx c;
+    ctx_begin(&c, window);
+
+    float cx = x;
+    for (const char* p = text; *p; p++) {
+        if (*p == '\n') { cx = x; y += (GLYPH_H + 2) * scale; continue; }
+        char ch = *p;
+        if (ch < 32 || ch > 126) ch = '?';
+        const unsigned char* glyph = font5x7[(int)(ch - 32)];
+        for (int col = 0; col < GLYPH_W; col++) {
+            unsigned char bits = glyph[col];
+            for (int row = 0; row < GLYPH_H; row++) {
+                if (bits & (1 << row)) {
+                    ctx_push_quad(&c,
+                        cx + col * scale,
+                        y  + row * scale,
+                        scale, scale);
+                }
+            }
+        }
+        cx += (GLYPH_W + 1) * scale;
+    }
+
+    ctx_flush(&c, r, g, b, a);
+    ctx_end(&c);
+}
+
+// ---------- camera panel (uses draw_text) ----------
+void overlay_draw(GLFWwindow* window, const Camera* cam) {
+    // Panel background + border could stay as before; or use draw_text only.
+    // Here we just draw text; the panel is optional.
+    const float S = 2.0f;
+    float tx = 20, ty = 20, lh = (GLYPH_H + 2) * S;
+
+    char buf[160];
+
+    draw_text(window, "== CAMERA ==", tx, ty, 0.0f, 1.0f, 0.5f, 1.0f, S);
+
+    snprintf(buf, sizeof(buf), "pos:   %.2f %.2f %.2f",
+             cam->pos[0], cam->pos[1], cam->pos[2]);
+    draw_text(window, buf, tx, ty + lh, 1, 1, 1, 1, S);
+
+    snprintf(buf, sizeof(buf), "yaw:   %.2f rad  pitch: %.2f rad",
+             cam->yaw, cam->pitch);
+    draw_text(window, buf, tx, ty + lh*2, 1, 1, 1, 1, S);
+
+    snprintf(buf, sizeof(buf), "yaw:   %.1f deg  pitch: %.1f deg",
+             cam->yaw * 57.2958f, cam->pitch * 57.2958f);
+    draw_text(window, buf, tx, ty + lh*3, 1, 1, 1, 1, S);
+
+    snprintf(buf, sizeof(buf), "up:    %.1f %.1f %.1f",
+             cam->up[0], cam->up[1], cam->up[2]);
+    draw_text(window, buf, tx, ty + lh*4, 1, 1, 1, 1, S);
+}

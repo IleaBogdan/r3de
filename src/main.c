@@ -8,6 +8,7 @@
 #include<shapes.h>
 #include<buffers.h>
 #include<camera.h>
+#include<overlay.h>
 
 static float cube_vertices[] = {
     // Front face
@@ -36,6 +37,7 @@ int main(void){
     if(init_gl_stuff(&window)){
         return -1;
     }
+    overlay_init(window);
     // glfwSwapInterval(1);   // enable vsync, cap at monitor refresh rate
     glfwSwapInterval(2);   // enable vsync, cap at half monitor refresh rate
     glEnable(GL_DEPTH_TEST);
@@ -87,7 +89,17 @@ int main(void){
 
         // DRAW
         draw_shape(&b);
-
+        overlay_draw(window,&cam);
+        // {
+        //     int w, h;
+        //     glfwGetFramebufferSize(window, &w, &h);
+        //     const char* msg   = "Hello World";
+        //     const float scale = 2.0f;
+        //     const float pad   = 12.0f;
+        //     float x = (float)w - text_width(msg, scale) - pad;
+        //     float y = pad;
+        //     draw_text(window, msg, x, y, 1.0f, 0.5f, 0.2f, 1.0f, scale); // orange
+        // }
         glfwSwapBuffers(window);
         glfwPollEvents();
         camera_keyboard_input(window,&cam);
