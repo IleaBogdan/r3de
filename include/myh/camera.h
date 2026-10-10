@@ -43,9 +43,9 @@ static inline void camera_move(Camera*c,float forward,float right){
     float fy=-sp;
     float fz=-cy*cp;
 
-    // Right direction (perpendicular to forward on the ground plane)
+    // Right direction = normalize(cross(forward, up)) with up=(0,1,0)
     float rx=cy;
-    float rz=-sy;
+    float rz=sy;
 
     c->pos[0]+=fx*forward+rx*right;
     c->pos[1]+=fy*forward;
@@ -67,6 +67,19 @@ static inline Mat4 camera_view(const Camera*c) {
         tx,ty,tz,
         c->up[0],c->up[1],c->up[2]
     );
+}
+
+static inline void camera_keyboard_input(GLFWwindow*window,Camera*cam){
+    float rotSpeed=.02f;
+    if(glfwGetKey(window,GLFW_KEY_LEFT)==GLFW_PRESS)camera_rotate(cam,-rotSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_RIGHT)==GLFW_PRESS)camera_rotate(cam,rotSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_UP)==GLFW_PRESS)camera_rotate(cam,0.f,-rotSpeed);
+    if(glfwGetKey(window,GLFW_KEY_DOWN)==GLFW_PRESS)camera_rotate(cam,0.f,rotSpeed);
+    float moveSpeed=.02f;
+    if(glfwGetKey(window,GLFW_KEY_S)==GLFW_PRESS)camera_move(cam,-moveSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_W)==GLFW_PRESS)camera_move(cam,moveSpeed,0.f);
+    if(glfwGetKey(window,GLFW_KEY_A)==GLFW_PRESS)camera_move(cam,0.f,-moveSpeed);
+    if(glfwGetKey(window,GLFW_KEY_D)==GLFW_PRESS)camera_move(cam,0.f,moveSpeed);
 }
 
 #endif

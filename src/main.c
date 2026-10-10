@@ -31,19 +31,13 @@ static unsigned int cube_indices[] = {
     1, 2, 6,  6, 5, 1,   // right
 };
 
-void keyboard_(GLFWwindow*window,Camera*cam){
-    float rotSpeed=.02f;
-    if(glfwGetKey(window,GLFW_KEY_LEFT)==GLFW_PRESS)camera_rotate(cam,-rotSpeed,0.f);
-    if(glfwGetKey(window,GLFW_KEY_RIGHT)==GLFW_PRESS)camera_rotate(cam,rotSpeed,0.f);
-    if(glfwGetKey(window,GLFW_KEY_UP)==GLFW_PRESS)camera_rotate(cam,0.f,-rotSpeed);
-    if(glfwGetKey(window,GLFW_KEY_DOWN)==GLFW_PRESS)camera_rotate(cam,0.f,rotSpeed);
-}
-
 int main(void){
     GLFWwindow*window;
     if(init_gl_stuff(&window)){
         return -1;
     }
+    // glfwSwapInterval(1);   // enable vsync, cap at monitor refresh rate
+    glfwSwapInterval(2);   // enable vsync, cap at half monitor refresh rate
     glEnable(GL_DEPTH_TEST);
 
     GLuint program;
@@ -78,7 +72,7 @@ int main(void){
         glViewport(0,0,w,h);
 
         float t=(float)glfwGetTime();
-        bool spin=true;
+        bool spin=false;
 
         // BUILD THE MVP MATRIX
         Mat4 proj=mat4_perspective(1.f,(float)w/(float)h,.1f,100.f);
@@ -96,9 +90,9 @@ int main(void){
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        keyboard_(window,&cam);
+        camera_keyboard_input(window,&cam);
 
-        camera_move(&cam,.0005f,.0f);
+        // camera_move(&cam,.01,.0f);
         // camera_rotate(&cam,.01f,.0f);
     }
     glfwTerminate();
