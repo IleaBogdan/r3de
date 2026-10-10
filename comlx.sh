@@ -1,7 +1,7 @@
 #!/bin/bash
 
-gcc src\*.c \
+gcc src/*.c \
 	-o ./bin/cube \
-	-lglfw -ldl -lGL \
+	-lglfw -ldl -lGL -lm \
 	-I ./include \
 	-I ./include/myh
