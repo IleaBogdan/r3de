@@ -78,8 +78,20 @@ int main(void){
     buffer b2;
     init_buffer(&b2,&cube2_mesh);
 
+    Mesh pyramid_mesh=make_pyramid(1.f,1.f,-1.5f,0.f,0.f);
+    buffer bp;
+    init_buffer(&bp,&pyramid_mesh);
+    free_mesh(&pyramid_mesh);
+
+    Mesh cone_mesh=make_cone(32,.5f,1.f,1.5f,0.f,0.f);
+    buffer bc;
+    init_buffer(&bc,&cone_mesh);
+    free_mesh(&cone_mesh);
+
     stack_buf*draw_stack_var=NULL;
     push(&draw_stack_var,b);
+    push(&draw_stack_var,bp);
+    push(&draw_stack_var,bc);
     push(&draw_stack_var,b2);
     // printf("%d",stack_size(draw_stack_var));
     

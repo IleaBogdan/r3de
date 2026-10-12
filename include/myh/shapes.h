@@ -18,4 +18,8 @@ static inline Mesh*init_mesh(Mesh*m,float*verts,size_t vert_count,unsigned int*i
     return m;
 }
 
+Mesh make_pyramid(float base,float height,float ox,float oy,float oz);
+Mesh make_cone(int segments,float radius,float height,float ox,float oy,float oz);
+void free_mesh(Mesh*m);
+
 #endif
